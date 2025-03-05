@@ -13,8 +13,12 @@ return new class extends Migration
     {
         Schema::create('otp', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('user_id')->index();
             $table->string('code')->unique();
             $table->boolean('has_used')->default(false);
+            $table->timestamp('expires_at');
+
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
         });
     }
