@@ -32,15 +32,18 @@ class UserOnBoardingController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
-        // generate OTP
+        // otp
         $user->otp()->create([
-            'user_id' => $user->id,
             'code' => rand(100000, 999999),
             'has_used' => false,
             'expires_at' => now()->addMinutes(5),
         ]);
 
-        $data = new UserResource($user);
-        return $data->response()->setStatusCode(201);
+        // $data = new UserResource($user);
+        return response()->json([
+            'data' => new UserResource($user),
+            'message' => 'User created successfully, please verify your email',
+            'status' => 'success',
+        ], 201);
     }
 }
