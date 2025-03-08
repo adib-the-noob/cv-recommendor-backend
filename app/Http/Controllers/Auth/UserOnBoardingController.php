@@ -28,7 +28,7 @@ class UserOnBoardingController extends Controller
 
 
         if (User::where('email', $request->email)->exists()) {
-            return response()->json(['message' => 'Email already exists'], 400);
+            return response()->json(['message' => 'Email already exists'], 200);
         }
         
         $user = User::create([
@@ -38,6 +38,7 @@ class UserOnBoardingController extends Controller
         ]);
 
         $generated_otp = rand(100000, 999999);
+        
         Cache::put('otp_'. $request->email, $generated_otp, now()->addMinutes(5));
         Mail::to($request->email)->send(new OTPMail($generated_otp));
 
