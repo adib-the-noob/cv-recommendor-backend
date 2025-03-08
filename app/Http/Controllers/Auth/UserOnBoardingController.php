@@ -9,6 +9,11 @@ use Illuminate\Http\Request;
 
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Mail;
+
+use App\Mail\OTPMail;
+
 
 class UserOnBoardingController extends Controller
 {
@@ -32,9 +37,13 @@ class UserOnBoardingController extends Controller
             'password' => Hash::make($request->password),
         ]);
 
+        $generated_otp = rand(100000, 999999);
+        Cache::put('otp_'. $request->email, $generated_otp, now()->addMinutes(5));
+        Mail::to($request->email)->send(new OTPMail($generated_otp));
+
         // otp
         $user->otp()->create([
-            'code' => rand(100000, 999999),
+            'code' => $generated_otp,
             'has_used' => false,
             'expires_at' => now()->addMinutes(5),
         ]);
@@ -45,5 +54,12 @@ class UserOnBoardingController extends Controller
             'message' => 'User created successfully, please verify your email',
             'status' => 'success',
         ], 201);
+    }
+
+    public function userLogin(Request $request){
+        $request->validate([
+            'email' =>'required|email',
+            'password' =>'required|string',
+        ]);
     }
 }
